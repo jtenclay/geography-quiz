@@ -19,8 +19,16 @@ body {
 	position: relative;
 }
 
+/*
+
 svg #fills polyline, svg #fills path {
 	display: none;
+}
+
+*/
+
+.answered {
+	fill: red;
 }
 
 svg {

@@ -293,11 +293,10 @@ var prefectures = [
 var checkForMatch = function() {
 	for (var i = 0; i < prefectures.length; i++) {
 		if (inputBox.value === prefectures[i].kana && prefectures[i].answered !== true) {
-			console.log(prefectures[i].kanji);
 			inputBox.value = "";
 			prefectures[i].answered = true;
-			console.log(prefectures[i]);
-			document.getElementById(prefectures[i].position).style.display = "block";
+			console.log(document.getElementById(prefectures[i].position));
+			document.getElementById(prefectures[i].position).style.fill = "beige";
 		};
 	};
 };
