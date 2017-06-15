@@ -4,6 +4,7 @@
 var inputBox = document.getElementById('input-box');
 wanakana.bind(inputBox);
 
+var prefCount = 0;
 var prefectures = [
 	{
 		kana: "ほっかいどう",
@@ -295,7 +296,11 @@ var checkForMatch = function() {
 		if (inputBox.value === prefectures[i].kana && prefectures[i].answered !== true) {
 			inputBox.value = "";
 			prefectures[i].answered = true;
-			document.getElementById(prefectures[i].position).style.fill = "beige";
+			document.getElementById(prefectures[i].position).style.fill = "#99E078";
+			document.getElementById(prefectures[i].kanji).style.opacity = "1";
+			prefCount ++;
+			document.querySelector("#prefectures-counter span").textContent = prefCount;
+			checkForWin();
 		};
 	};
 };
@@ -309,7 +314,7 @@ inputBox.addEventListener("input",checkForMatch);
 
 var japanMap = document.getElementById("japan-map");
 var svgWrapper = document.getElementById("svg");
-var transformMatrix = [1,0,0,1,0,0];
+var transformMatrix = [1,0,0,1,9,11]; // japan-map begins slightly padded; this is the identity matrix
 
 var panMap = function(dx,dy) {
 	transformMatrix[4] += dx;
@@ -474,6 +479,90 @@ document.addEventListener("mousemove",function(e){
 document.addEventListener("mouseup",function(e){
 	moveMapFlag = false;
 });
+
+
+
+// start game
+
+var startGame = function() {
+	document.getElementById("start-game").style.display = "none";
+	document.getElementById("timer").style.display = "block";
+	document.getElementById("input-box").style.display = "block";
+	document.getElementById("prefectures-counter").style.display = "block";
+	startTimer();
+};
+
+document.getElementById("start-game").addEventListener("click",startGame);
+document.getElementById("try-again").addEventListener("click",function(){
+	location.reload();
+});
+
+
+
+// win script
+
+var checkForWin = function() {
+	if (prefCount === 47) {
+		document.getElementById("game-success").style.display = "inline"; // display win message
+		document.getElementById("input-box").style.display = "none";
+		document.getElementById("try-again").style.display = "block";
+		clearInterval(gameTimer);
+	};
+};
+
+
+
+// game timer
+
+var timeRemaining; // hoist
+var gameTimer;
+var minutesDom = document.getElementById("minutes");
+var secondsDom = document.getElementById("seconds");
+
+var checkForTimerEnd = function() {
+	if (timeRemaining <= 0) {
+		document.getElementById("game-failure").style.display = "inline";
+		document.getElementById("try-again").style.display = "block";
+		clearInterval(gameTimer);
+		document.getElementById("input-box").style.display = "none";
+		for (var i = 0; i < prefectures.length; i++) {
+			if (!prefectures[i].answered) {
+				document.getElementById(prefectures[i].kanji).style.opacity = "1";
+				document.getElementById(prefectures[i].position).style.fill = "#FF6060";
+			};
+		};
+	};
+};
+
+var startTimer = function() {
+	timeRemaining = 300; // format to seconds
+
+	gameTimer = setInterval(function(){
+		timeRemaining--;
+		minutes = Math.floor(timeRemaining / 60);
+		seconds = timeRemaining % 60;
+		if (seconds.toString().length === 1) { // format seconds to two digits
+			seconds = "0" + seconds.toString();
+		};
+		minutesDom.textContent = minutes; // update DOM
+		secondsDom.textContent = seconds;
+		checkForTimerEnd();
+	}, 1000)
+}; // timer is called when game begins
+
+
+
+
+
+
+
+
+
+// for future reference
+// http://www.petercollingridge.co.uk/data-visualisation/introduction-svg-scripting-interactive-map
+// http://www.petercollingridge.co.uk/interactive-svg-components/pan-and-zoom-text
+
+
 
 
 
