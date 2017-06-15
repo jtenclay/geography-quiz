@@ -318,10 +318,10 @@ var panMap = function(dx,dy) {
 	japanMap.setAttribute("transform", newMatrix);
 };
 
-document.getElementById("pan-left").addEventListener("click",function(){
-	panMap(-10,0);
-	console.log("left");
-});
+// document.getElementById("pan-left").addEventListener("click",function(){
+// 	panMap(-10,0);
+// 	console.log("left");
+// });
 
 
 
@@ -406,21 +406,27 @@ addWheelListener(document, function( e ) {
 
 
 
-// zoom function
+// zoom function including center on pointer
 
 var width  = parseInt(svgWrapper.getAttribute("width"));
 var height = parseInt(svgWrapper.getAttribute("height"));
-var offsetX = document.getElementById("viewport").getBoundingClientRect().left;
-var offsetY = document.getElementById("viewport").getBoundingClientRect().top;
-var computedWidth = document.getElementById("viewport").getBoundingClientRect().width;
-var computedHeight = document.getElementById("viewport").getBoundingClientRect().height;
+var viewport = document.getElementById("viewport");
+var offsetX = viewport.getBoundingClientRect().left;
+var offsetY = viewport.getBoundingClientRect().top;
+var computedWidth = viewport.getBoundingClientRect().width;
+var computedHeight = viewport.getBoundingClientRect().height;
+
+window.addEventListener("resize",function(){
+	offsetX = viewport.getBoundingClientRect().left;
+	offsetY = viewport.getBoundingClientRect().top;
+	computedWidth = viewport.getBoundingClientRect().width;
+	computedHeight = viewport.getBoundingClientRect().height;
+});
 
 function zoom(scale,e) {
 	for (var i=0; i<transformMatrix.length; i++) {
     	transformMatrix[i] *= scale;
-	}
-	var realSvgWidth = document.querySelector("svg").getBoundingClientRect().width;
-	var realSvgHeight = document.querySelector("svg").getBoundingClientRect().height;
+	};
 	transformMatrix[4] += (1-scale)*(e.clientX - offsetX)*width/computedWidth;
 	transformMatrix[5] += (1-scale)*(e.clientY - offsetY)*height/computedHeight;
 	newMatrix = "matrix(" +  transformMatrix.join(' ') + ")";
@@ -429,66 +435,45 @@ function zoom(scale,e) {
 
 
 
+// event listeners for dragging map
 
+var lastPosition = {
+	x: 0,
+	y: 0
+};
 
-// var root = document.getElementById("svg");
+var moveMapFlag = false;
 
-// function getEventPoint(evt) {
-// 	var p = {};
+document.addEventListener("mousedown",function(e){
+	lastPosition = {
+		x: e.clientX,
+		y: e.clientY
+	};
+	moveMapFlag = true;
+});
 
-// 	p.x = evt.clientX;
-// 	p.y = evt.clientY;
-// console.log(p);
-// 	return p;
-// }
+document.addEventListener("mousemove",function(e){
+	if (moveMapFlag === true) {
+		var newPosition = {
+			x: e.clientX,
+			y: e.clientY
+		};
+		var delta = {
+			x: newPosition.x - lastPosition.x,
+			y: newPosition.y - lastPosition.y
+		}
+		delta = {
+			x: delta.x * width/computedWidth,
+			y: delta.y * height/computedHeight
+		}
+		panMap(delta.x,delta.y);
+		lastPosition = newPosition;
+	};
+});
 
-// var zoomScale = 0.2; // Zoom sensitivity
-
-// if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
-// 		window.addEventListener('wheel', handleMouseWheel, false); // Chrome/Safari
-// 	} else {
-// 		window.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
-// };
-
-// function handleMouseWheel(evt) {
-	
-// 	if(evt.preventDefault)
-// 		evt.preventDefault();
-
-// 	evt.returnValue = false;
-
-// 	var svgDoc = evt.target.ownerDocument;
-
-// 	var delta;
-
-// 	if(evt.wheelDelta)
-// 		delta = evt.wheelDelta / 360; // Chrome/Safari
-// 	else
-// 		delta = evt.detail / -9; // Mozilla
-
-// 	var z = Math.pow(1 + zoomScale, delta);
-// 	console.log(z);
-
-// 	var g = document.getElementById("viewport");
-	
-// 	var p = getEventPoint(evt);
-
-// 	p = p.matrixTransform(g.getCTM().inverse());
-
-// 	// Compute new scale matrix in current mouse position
-// 	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-
-//         setCTM(g, g.getCTM().multiply(k));
-
-// 	if(typeof(stateTf) == "undefined")
-// 		stateTf = g.getCTM().inverse();
-
-// 	stateTf = stateTf.multiply(k.inverse());
-// }
-
-
-
-
+document.addEventListener("mouseup",function(e){
+	moveMapFlag = false;
+});
 
 
 
