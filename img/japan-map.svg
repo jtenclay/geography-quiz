@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <svg width="538px" height="614px" viewBox="0 0 538 614" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
     <title>japan-map</title>
     <desc>Created with Sketch.</desc>
     <defs></defs>
+    <script xlink:href="../js/svgpan.js"/>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="japan-map">
             <g id="fills" fill="#818283">

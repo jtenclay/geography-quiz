@@ -295,7 +295,6 @@ var checkForMatch = function() {
 		if (inputBox.value === prefectures[i].kana && prefectures[i].answered !== true) {
 			inputBox.value = "";
 			prefectures[i].answered = true;
-			console.log(document.getElementById(prefectures[i].position));
 			document.getElementById(prefectures[i].position).style.fill = "beige";
 		};
 	};
@@ -305,6 +304,219 @@ inputBox.addEventListener("input",checkForMatch);
 
 
 
+// get scroll distance
+// from http://www.dyn-web.com/javascript/scroll-distance/
+
+function dw_getScrollOffsets() {
+    var doc = document, w = window;
+    var x, y, docEl;
+    
+    if ( typeof w.pageYOffset === 'number' ) {
+        x = w.pageXOffset;
+        y = w.pageYOffset;
+    } else {
+        docEl = (doc.compatMode && doc.compatMode === 'CSS1Compat')?
+                doc.documentElement: doc.body;
+        x = docEl.scrollLeft;
+        y = docEl.scrollTop;
+    }
+    return {x:x, y:y};
+}
+
+
+
+// pan map function
+// http://www.petercollingridge.co.uk/interactive-svg-components/pan-and-zoom-control
+
+var japanMap = document.getElementById("japan-map");
+var transformMatrix = [1,0,0,1,0,0];
+
+var panMap = function(dx,dy) {
+	transformMatrix[4] += dx;
+	transformMatrix[5] += dy;
+	var newMatrix = "matrix(" + transformMatrix.join(" ") + ")";
+	japanMap.setAttribute("transform", newMatrix);
+};
+
+document.getElementById("pan-left").addEventListener("click",function(){
+	panMap(-10,0);
+	console.log("left");
+});
+
+var originalPosition = dw_getScrollOffsets();
+console.log(originalPosition);
+
+// document.addEventListener("wheel",function(e) {
+// 	e.preventDefault();
+// 	// var newPosition = dw_getScrollOffsets();
+// 	// panMap(newPosition.x - originalPosition.x, newPosition.y - originalPosition.y);
+// 	// console.log(newPosition.y - originalPosition.y);
+// 	// originalPosition = newPosition;
+
+// 	var delta;
+
+// 	if(e.wheelDelta)
+// 		delta = e.wheelDelta / 360; // Chrome/Safari
+// 	else
+// 		delta = e.detail / -9; // Mozilla
+// console.log(delta);
+// 	var z = Math.pow(1.2, delta); // 1.2 is the zoom power
+// 	zoom(z);
+	
+// })
+// creates a global "addWheelListener" method
+// example: addWheelListener( elem, function( e ) { console.log( e.deltaY ); e.preventDefault(); } );
+(function(window,document) {
+
+    var prefix = "", _addEventListener, support;
+
+    // detect event model
+    if ( window.addEventListener ) {
+        _addEventListener = "addEventListener";
+    } else {
+        _addEventListener = "attachEvent";
+        prefix = "on";
+    }
+
+    // detect available wheel event
+    support = "onwheel" in document.createElement("div") ? "wheel" : // Modern browsers support "wheel"
+              document.onmousewheel !== undefined ? "mousewheel" : // Webkit and IE support at least "mousewheel"
+              "DOMMouseScroll"; // let's assume that remaining browsers are older Firefox
+
+    window.addWheelListener = function( elem, callback, useCapture ) {
+        _addWheelListener( elem, support, callback, useCapture );
+
+        // handle MozMousePixelScroll in older Firefox
+        if( support == "DOMMouseScroll" ) {
+            _addWheelListener( elem, "MozMousePixelScroll", callback, useCapture );
+        }
+    };
+
+    function _addWheelListener( elem, eventName, callback, useCapture ) {
+        elem[ _addEventListener ]( prefix + eventName, support == "wheel" ? callback : function( originalEvent ) {
+            !originalEvent && ( originalEvent = window.event );
+
+            // create a normalized event object
+            var event = {
+                // keep a ref to the original event object
+                originalEvent: originalEvent,
+                target: originalEvent.target || originalEvent.srcElement,
+                type: "wheel",
+                deltaMode: originalEvent.type == "MozMousePixelScroll" ? 0 : 1,
+                deltaX: 0,
+                deltaY: 0,
+                deltaZ: 0,
+                preventDefault: function() {
+                    originalEvent.preventDefault ?
+                        originalEvent.preventDefault() :
+                        originalEvent.returnValue = false;
+                }
+            };
+            
+            // calculate deltaY (and deltaX) according to the event
+            if ( support == "mousewheel" ) {
+                event.deltaY = - 1/40 * originalEvent.wheelDelta;
+                // Webkit also support wheelDeltaX
+                originalEvent.wheelDeltaX && ( event.deltaX = - 1/40 * originalEvent.wheelDeltaX );
+            } else {
+                event.deltaY = originalEvent.deltaY || originalEvent.detail;
+            }
+
+            // it's time to fire the callback
+            return callback( event );
+
+        }, useCapture || false );
+    }
+
+})(window,document);
+addWheelListener(document, function( e ) { 
+	console.log( e.deltaY / 360); 
+	e.preventDefault(); 
+	var z = Math.pow(1.2, e.deltaY / -360); // 1.2 is the zoom power
+ 	zoom(z);
+} );
+
+
+
+    width  = japanMap.getAttribute("width");
+
+    height = japanMap.getAttribute("height");
+
+
+function zoom(scale)
+
+{
+  for (var i=0; i<transformMatrix.length; i++)
+  {
+    transformMatrix[i] *= scale;
+  }
+   transformMatrix[4] += (1-scale)*width/2;
+  transformMatrix[5] += (1-scale)*height/2;
+
+  newMatrix = "matrix(" +  transformMatrix.join(' ') + ")";
+
+  japanMap.setAttribute("transform", newMatrix);
+
+}
+
+
+
+
+
+// var root = document.getElementById("svg");
+
+// function getEventPoint(evt) {
+// 	var p = {};
+
+// 	p.x = evt.clientX;
+// 	p.y = evt.clientY;
+// console.log(p);
+// 	return p;
+// }
+
+// var zoomScale = 0.2; // Zoom sensitivity
+
+// if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+// 		window.addEventListener('wheel', handleMouseWheel, false); // Chrome/Safari
+// 	} else {
+// 		window.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
+// };
+
+// function handleMouseWheel(evt) {
+	
+// 	if(evt.preventDefault)
+// 		evt.preventDefault();
+
+// 	evt.returnValue = false;
+
+// 	var svgDoc = evt.target.ownerDocument;
+
+// 	var delta;
+
+// 	if(evt.wheelDelta)
+// 		delta = evt.wheelDelta / 360; // Chrome/Safari
+// 	else
+// 		delta = evt.detail / -9; // Mozilla
+
+// 	var z = Math.pow(1 + zoomScale, delta);
+// 	console.log(z);
+
+// 	var g = document.getElementById("viewport");
+	
+// 	var p = getEventPoint(evt);
+
+// 	p = p.matrixTransform(g.getCTM().inverse());
+
+// 	// Compute new scale matrix in current mouse position
+// 	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+
+//         setCTM(g, g.getCTM().multiply(k));
+
+// 	if(typeof(stateTf) == "undefined")
+// 		stateTf = g.getCTM().inverse();
+
+// 	stateTf = stateTf.multiply(k.inverse());
+// }
 
 
 
