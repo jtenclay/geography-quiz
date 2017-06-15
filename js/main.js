@@ -401,7 +401,7 @@ document.getElementById("pan-left").addEventListener("click",function(){
 addWheelListener(document, function( e ) {  
 	e.preventDefault(); 
 	var z = Math.pow(1.2, e.deltaY / -360); // 1.2 is the zoom power
- 	zoom(z);
+ 	zoom(z,e);
 } );
 
 
@@ -410,13 +410,19 @@ addWheelListener(document, function( e ) {
 
 var width  = parseInt(svgWrapper.getAttribute("width"));
 var height = parseInt(svgWrapper.getAttribute("height"));
+var offsetX = document.getElementById("viewport").getBoundingClientRect().left;
+var offsetY = document.getElementById("viewport").getBoundingClientRect().top;
+var computedWidth = document.getElementById("viewport").getBoundingClientRect().width;
+var computedHeight = document.getElementById("viewport").getBoundingClientRect().height;
 
-function zoom(scale) {
+function zoom(scale,e) {
 	for (var i=0; i<transformMatrix.length; i++) {
     	transformMatrix[i] *= scale;
 	}
-	transformMatrix[4] += (1-scale)*width/2;
-	transformMatrix[5] += (1-scale)*height/2;
+	var realSvgWidth = document.querySelector("svg").getBoundingClientRect().width;
+	var realSvgHeight = document.querySelector("svg").getBoundingClientRect().height;
+	transformMatrix[4] += (1-scale)*(e.clientX - offsetX)*width/computedWidth;
+	transformMatrix[5] += (1-scale)*(e.clientY - offsetY)*height/computedHeight;
 	newMatrix = "matrix(" +  transformMatrix.join(' ') + ")";
 	japanMap.setAttribute("transform", newMatrix);
 };
