@@ -304,31 +304,11 @@ inputBox.addEventListener("input",checkForMatch);
 
 
 
-// get scroll distance
-// from http://www.dyn-web.com/javascript/scroll-distance/
-
-function dw_getScrollOffsets() {
-    var doc = document, w = window;
-    var x, y, docEl;
-    
-    if ( typeof w.pageYOffset === 'number' ) {
-        x = w.pageXOffset;
-        y = w.pageYOffset;
-    } else {
-        docEl = (doc.compatMode && doc.compatMode === 'CSS1Compat')?
-                doc.documentElement: doc.body;
-        x = docEl.scrollLeft;
-        y = docEl.scrollTop;
-    }
-    return {x:x, y:y};
-}
-
-
-
 // pan map function
 // http://www.petercollingridge.co.uk/interactive-svg-components/pan-and-zoom-control
 
 var japanMap = document.getElementById("japan-map");
+var svgWrapper = document.getElementById("svg");
 var transformMatrix = [1,0,0,1,0,0];
 
 var panMap = function(dx,dy) {
@@ -343,29 +323,13 @@ document.getElementById("pan-left").addEventListener("click",function(){
 	console.log("left");
 });
 
-var originalPosition = dw_getScrollOffsets();
-console.log(originalPosition);
 
-// document.addEventListener("wheel",function(e) {
-// 	e.preventDefault();
-// 	// var newPosition = dw_getScrollOffsets();
-// 	// panMap(newPosition.x - originalPosition.x, newPosition.y - originalPosition.y);
-// 	// console.log(newPosition.y - originalPosition.y);
-// 	// originalPosition = newPosition;
 
-// 	var delta;
+// scrolljacking: zoom map on mouse scroll
+// from https://github.com/aleofreddi/svgpan and https://developer.mozilla.org/en-US/docs/Web/Events/wheel
 
-// 	if(e.wheelDelta)
-// 		delta = e.wheelDelta / 360; // Chrome/Safari
-// 	else
-// 		delta = e.detail / -9; // Mozilla
-// console.log(delta);
-// 	var z = Math.pow(1.2, delta); // 1.2 is the zoom power
-// 	zoom(z);
-	
-// })
-// creates a global "addWheelListener" method
-// example: addWheelListener( elem, function( e ) { console.log( e.deltaY ); e.preventDefault(); } );
+// create a global "addWheelListener" method
+
 (function(window,document) {
 
     var prefix = "", _addEventListener, support;
@@ -429,8 +393,12 @@ console.log(originalPosition);
     }
 
 })(window,document);
-addWheelListener(document, function( e ) { 
-	console.log( e.deltaY / 360); 
+
+
+
+// add the scroll listener to the document
+
+addWheelListener(document, function( e ) {  
 	e.preventDefault(); 
 	var z = Math.pow(1.2, e.deltaY / -360); // 1.2 is the zoom power
  	zoom(z);
@@ -438,26 +406,20 @@ addWheelListener(document, function( e ) {
 
 
 
-    width  = japanMap.getAttribute("width");
+// zoom function
 
-    height = japanMap.getAttribute("height");
+var width  = parseInt(svgWrapper.getAttribute("width"));
+var height = parseInt(svgWrapper.getAttribute("height"));
 
-
-function zoom(scale)
-
-{
-  for (var i=0; i<transformMatrix.length; i++)
-  {
-    transformMatrix[i] *= scale;
-  }
-   transformMatrix[4] += (1-scale)*width/2;
-  transformMatrix[5] += (1-scale)*height/2;
-
-  newMatrix = "matrix(" +  transformMatrix.join(' ') + ")";
-
-  japanMap.setAttribute("transform", newMatrix);
-
-}
+function zoom(scale) {
+	for (var i=0; i<transformMatrix.length; i++) {
+    	transformMatrix[i] *= scale;
+	}
+	transformMatrix[4] += (1-scale)*width/2;
+	transformMatrix[5] += (1-scale)*height/2;
+	newMatrix = "matrix(" +  transformMatrix.join(' ') + ")";
+	japanMap.setAttribute("transform", newMatrix);
+};
 
 
 
