@@ -1,6 +1,7 @@
 # Japanese Geography Quiz
 
 A side project during General Assembly's Web Development Immersive Bootcamp.
+You can try it out [here](http://jacksontenclay.com/geography-quiz/)
 
 ## User Story
 
